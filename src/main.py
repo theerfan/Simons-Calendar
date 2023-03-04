@@ -1,10 +1,11 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
 from pytz import timezone
+import pause
 
 from gcalendar import add_events
 
@@ -31,9 +32,6 @@ def main():
 
     # Use BeautifulSoup to parse the html
     soup = BeautifulSoup(html, "html.parser")
-
-    # # Get the div with the id "view-pattern--upcoming_events--block_upcoming_public_lectures"
-    # upcoming_events = soup.find(id="view-pattern--upcoming_events--block_upcoming_public_lectures")
 
     # Get all divs inside the div with the class "views-row"
     events = soup.find_all(class_="views-row")
@@ -132,4 +130,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+
+        # Wait until the next day to check for new events
+        start_of_today = datetime.now().astimezone(la_timezone).replace(hour=0, minute=0, second=0)
+        start_of_tomorrow = start_of_today + timedelta(days=1)
+        pause.until(start_of_tomorrow)
+
